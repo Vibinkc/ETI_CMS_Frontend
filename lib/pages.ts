@@ -19,18 +19,20 @@ export function getSitePages(): Promise<Page[]> {
   return pending;
 }
 
-/** Every page title ends in "- Electrical Training Institute"; drop it. */
 const SITE_SUFFIX = "Electrical Training Institute";
 const SEPARATORS = ["-", "–"];
 
 /**
  * Drop the site name every page title ends with.
  *
+ * Shared with the sidebar, which shows the same shortened titles — the two
+ * must agree, so there is one copy.
+ *
  * String operations rather than a regular expression: the pattern this
  * replaced had an optional-whitespace group either side of a literal, which
  * backtracks badly on a title made mostly of spaces.
  */
-function withoutSiteName(title: string): string {
+export function withoutSiteName(title: string): string {
   const name = title.trim();
   if (!name.toLowerCase().endsWith(SITE_SUFFIX.toLowerCase())) return name;
   const head = name.slice(0, -SITE_SUFFIX.length).trimEnd();
