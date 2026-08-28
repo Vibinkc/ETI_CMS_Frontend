@@ -41,9 +41,23 @@ export default function MediaPicker({
   // showModal() is what makes <dialog> a modal: it puts the dialog in the top
   // layer, traps focus, and handles Escape itself. Rendering the element alone
   // would leave it inert and invisible.
+  //
+  // The backdrop click is bound here rather than as an onClick prop. The
+  // backdrop is a pseudo-element, so there is no node to put a handler on —
+  // a click on it reports the dialog as the target. A handler on the dialog
+  // itself would be a mouse-only affordance on a non-interactive element;
+  // bound this way it stays what it is, a shortcut on top of the keyboard
+  // route (Escape) and the Cancel button, both of which work without it.
   useEffect(() => {
     const el = dialogRef.current;
-    if (el && !el.open) el.showModal();
+    if (!el) return;
+    if (!el.open) el.showModal();
+
+    const dismissOnBackdrop = (e: MouseEvent) => {
+      if (e.target === el) el.close();
+    };
+    el.addEventListener("click", dismissOnBackdrop);
+    return () => el.removeEventListener("click", dismissOnBackdrop);
   }, []);
 
   async function upload(file: File) {
@@ -70,14 +84,8 @@ export default function MediaPicker({
       ref={dialogRef}
       className="dialog"
       aria-label="Choose media"
-      // fires for Escape as well as close(), so both routes end up here
+      // fires for Escape, for close(), and so for the backdrop click too
       onClose={onClose}
-      onClick={(e) => {
-        // the backdrop is a pseudo-element of the dialog, so a click on it
-        // reports the dialog itself as the target; a click on the content
-        // reports something inside
-        if (e.target === dialogRef.current) onClose();
-      }}
     >
       <div className="dialog-inner">
         <div className="dialog-head">
