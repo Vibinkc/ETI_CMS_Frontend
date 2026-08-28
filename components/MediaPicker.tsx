@@ -32,19 +32,19 @@ export default function MediaPicker({
       .then(setItems)
       .catch((e) => setError(e instanceof Error ? e.message : "Could not load media"));
 
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
   useEffect(() => {
     load();
   }, []);
 
-  // A dialog has to be dismissable from the keyboard, not only by clicking
-  // outside it.
+  // showModal() is what makes <dialog> a modal: it puts the dialog in the top
+  // layer, traps focus, and handles Escape itself. Rendering the element alone
+  // would leave it inert and invisible.
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+    const el = dialogRef.current;
+    if (el && !el.open) el.showModal();
+  }, []);
 
   async function upload(file: File) {
     setBusy(true);
@@ -66,16 +66,20 @@ export default function MediaPicker({
   const visible = items?.filter(wanted) ?? [];
 
   return (
-    <div
-      className="overlay"
-      role="presentation"
+    <dialog
+      ref={dialogRef}
+      className="dialog"
+      aria-label="Choose media"
+      // fires for Escape as well as close(), so both routes end up here
+      onClose={onClose}
       onClick={(e) => {
-        // only the backdrop itself dismisses; a click inside the dialog must
-        // not, which is what the old stopPropagation handler was for
-        if (e.target === e.currentTarget) onClose();
+        // the backdrop is a pseudo-element of the dialog, so a click on it
+        // reports the dialog itself as the target; a click on the content
+        // reports something inside
+        if (e.target === dialogRef.current) onClose();
       }}
     >
-      <div className="dialog" role="dialog" aria-modal="true" aria-label="Choose media">
+      <div className="dialog-inner">
         <div className="dialog-head">
           <h2 style={{ margin: 0, fontSize: 16 }}>
             Choose {kind === "video" ? "a video" : "an image"}
@@ -153,6 +157,6 @@ export default function MediaPicker({
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
