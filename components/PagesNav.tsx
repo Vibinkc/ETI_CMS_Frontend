@@ -80,8 +80,29 @@ const PAGE_ICONS: Record<string, IconComponent> = {
 
 type Node = { page: Page; children: Node[]; label: string };
 
+const SITE_SUFFIX = "Electrical Training Institute";
+const SEPARATORS = ["-", "–"];
+
+/**
+ * Drop the site name every page title ends with.
+ *
+ * String operations rather than a regular expression: the pattern this
+ * replaced had an optional-whitespace group either side of a literal, which
+ * backtracks badly on a title made mostly of spaces.
+ */
+function withoutSiteName(title: string): string {
+  const name = title.trim();
+  if (!name.toLowerCase().endsWith(SITE_SUFFIX.toLowerCase())) return name;
+  const head = name.slice(0, -SITE_SUFFIX.length).trimEnd();
+  // only strip it when a separator is actually there, so a page genuinely
+  // called "Electrical Training Institute" survives
+  return SEPARATORS.some((s) => head.endsWith(s))
+    ? head.slice(0, -1).trimEnd()
+    : name;
+}
+
 function titleOf(page: Page): string {
-  return page.title.replace(/\s*[-–]\s*Electrical Training Institute\s*$/i, "").trim();
+  return withoutSiteName(page.title);
 }
 
 /** "all-news" -> "All News", used when two pages share a title. */

@@ -106,11 +106,13 @@ export default function Roles() {
         <div className="content">
           {error && <div className="notice notice-error">{error}</div>}
           <div className="form-grid">
-            <label>Name
+            <label>
+              <span>Name</span>
               <input value={editing.name} disabled={editing.is_system}
                 onChange={(e) => setEditing({ ...editing, name: e.target.value })} />
             </label>
-            <label>Description
+            <label>
+              <span>Description</span>
               <input value={editing.description}
                 onChange={(e) => setEditing({ ...editing, description: e.target.value })} />
             </label>
@@ -157,10 +159,12 @@ export default function Roles() {
         <div className="content">
           {error && <div className="notice notice-error">{error}</div>}
           <div className="form-grid">
-            <label>Name *
+            <label>
+              <span>Name *</span>
               <input value={draftName} onChange={(e) => setDraftName(e.target.value)} />
             </label>
-            <label>Description
+            <label>
+              <span>Description</span>
               <input value={draftDesc} placeholder="what this role is for"
                 onChange={(e) => setDraftDesc(e.target.value)} />
             </label>

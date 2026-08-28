@@ -125,14 +125,14 @@ export default function Activity() {
           <input className="sub-search" type="search" placeholder="Search what happened"
             value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search the activity log" />
           <label className="sub-check">
-            Who
+            <span>Who</span>
             <select value={who} onChange={(e) => setWho(e.target.value)}>
               <option value="">Everyone</option>
               {filters.usernames.map((u) => <option key={u} value={u}>{u}</option>)}
             </select>
           </label>
           <label className="sub-check">
-            What
+            <span>What</span>
             <select value={what} onChange={(e) => setWhat(e.target.value)}>
               <option value="">Everything</option>
               {filters.actions.map((a) => (

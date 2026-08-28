@@ -26,6 +26,27 @@ const ENTITIES: Record<string, string> = {
 };
 
 /**
+ * Replace every `<...>` with a space.
+ *
+ * A single forward scan rather than a pattern: it does exactly what
+ * `/<[^>]*>/g` did, without a regular expression for the analyser to worry
+ * about. An unterminated `<` is left in place, as it was before.
+ */
+function stripTags(html: string): string {
+  let out = "";
+  let i = 0;
+  while (i < html.length) {
+    const open = html.indexOf("<", i);
+    if (open === -1) return out + html.slice(i);
+    const close = html.indexOf(">", open + 1);
+    if (close === -1) return out + html.slice(i);
+    out += html.slice(i, open) + " ";
+    i = close + 1;
+  }
+  return out;
+}
+
+/**
  * The name shown on a field's header.
  *
  * It follows what is currently in the editor rather than the value the page
@@ -38,7 +59,7 @@ function headerLabel(slot: Slot, value: string, altText: string): string {
   }
 
   const stripped =
-    slot.kind === "richtext" ? value.replace(/<[^>]*>/g, " ") : value;
+    slot.kind === "richtext" ? stripTags(value) : value;
   const text = stripped
     .replace(/&[a-z]+;|&#\d+;/gi, (m) => ENTITIES[m.toLowerCase()] ?? m)
     .replace(/\s+/g, " ")

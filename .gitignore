@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Deployment and CI config: kept locally, deliberately out of the repository.
+Dockerfile
+docker-compose.yml
+.dockerignore
+.github/

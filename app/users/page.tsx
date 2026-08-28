@@ -179,26 +179,31 @@ export default function Users() {
           {error && <div className="notice notice-error">{error}</div>}
 
           <div className="form-grid">
-            <label>First name
+            <label>
+              <span>First name</span>
               <input value={editing.first_name}
                 onChange={(e) => setEditing({ ...editing, first_name: e.target.value })} />
             </label>
-            <label>Last name
+            <label>
+              <span>Last name</span>
               <input value={editing.last_name}
                 onChange={(e) => setEditing({ ...editing, last_name: e.target.value })} />
             </label>
-            <label>Email
+            <label>
+              <span>Email</span>
               <input type="email" value={editing.email}
                 onChange={(e) => setEditing({ ...editing, email: e.target.value })} />
             </label>
-            <label>Role
+            <label>
+              <span>Role</span>
               <select value={editing.role_id ?? ""}
                 onChange={(e) => setEditing({ ...editing, role_id: e.target.value ? Number(e.target.value) : null })}>
                 <option value="">No role</option>
                 {roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
               </select>
             </label>
-            <label>New password
+            <label>
+              <span>New password</span>
               <input type="password" value={newPassword} autoComplete="new-password"
                 placeholder="leave blank to keep the current one"
                 onChange={(e) => setNewPassword(e.target.value)} />
@@ -256,29 +261,35 @@ export default function Users() {
           {error && <div className="notice notice-error">{error}</div>}
 
           <div className="form-grid">
-            <label>Username *
+            <label>
+              <span>Username *</span>
               <input value={draft.username} autoComplete="off"
                 onChange={(e) => setDraft({ ...draft, username: e.target.value })} />
             </label>
-            <label>Email *
+            <label>
+              <span>Email *</span>
               <input type="email" value={draft.email} autoComplete="off"
                 onChange={(e) => setDraft({ ...draft, email: e.target.value })} />
             </label>
-            <label>First name
+            <label>
+              <span>First name</span>
               <input value={draft.first_name}
                 onChange={(e) => setDraft({ ...draft, first_name: e.target.value })} />
             </label>
-            <label>Last name
+            <label>
+              <span>Last name</span>
               <input value={draft.last_name}
                 onChange={(e) => setDraft({ ...draft, last_name: e.target.value })} />
             </label>
-            <label>Password *
+            <label>
+              <span>Password *</span>
               <input type="password" value={draft.password} autoComplete="new-password"
                 aria-describedby="password-rule"
                 onChange={(e) => setDraft({ ...draft, password: e.target.value })} />
               <span id="password-rule" className="field-hint">at least 8 characters</span>
             </label>
-            <label>Role
+            <label>
+              <span>Role</span>
               <select value={draft.role_id ?? ""}
                 onChange={(e) => setDraft({ ...draft, role_id: e.target.value ? Number(e.target.value) : null })}>
                 <option value="">No role</option>

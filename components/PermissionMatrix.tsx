@@ -138,8 +138,11 @@ export default function PermissionMatrix({
 
                     {data.actions.map((a) => {
                       if (!obj.actions.includes(a.key)) {
-                        // not a thing you can do to this object
-                        return <td key={a.key} className="matrix-na" aria-hidden="true" />;
+                        // Not a thing you can do to this object. The cell stays
+                        // in the table so the row keeps its column count —
+                        // aria-hidden here would leave a screen reader counting
+                        // fewer cells than there are columns.
+                        return <td key={a.key} className="matrix-na" />;
                       }
                       const key = permission(obj.key, a.key);
                       const viaOther = inheritedSet.has(key);

@@ -395,7 +395,7 @@ export default function Submissions() {
               checked={unreadOnly}
               onChange={(e) => setUnreadOnly(e.target.checked)}
             />
-            Unread only
+            <span>Unread only</span>
           </label>
         </div>
 
@@ -430,7 +430,7 @@ export default function Submissions() {
                 />
               </label>
               <label>
-                To
+                <span>To</span>
                 <input
                   type="date"
                   value={to}

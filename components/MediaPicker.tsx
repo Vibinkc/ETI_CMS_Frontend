@@ -36,6 +36,16 @@ export default function MediaPicker({
     load();
   }, []);
 
+  // A dialog has to be dismissable from the keyboard, not only by clicking
+  // outside it.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   async function upload(file: File) {
     setBusy(true);
     setError(null);
@@ -56,8 +66,16 @@ export default function MediaPicker({
   const visible = items?.filter(wanted) ?? [];
 
   return (
-    <div className="overlay" onClick={onClose}>
-      <div className="dialog" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="overlay"
+      role="presentation"
+      onClick={(e) => {
+        // only the backdrop itself dismisses; a click inside the dialog must
+        // not, which is what the old stopPropagation handler was for
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="dialog" role="dialog" aria-modal="true" aria-label="Choose media">
         <div className="dialog-head">
           <h2 style={{ margin: 0, fontSize: 16 }}>
             Choose {kind === "video" ? "a video" : "an image"}
