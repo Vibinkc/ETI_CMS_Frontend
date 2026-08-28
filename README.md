@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ETI CMS — admin
 
-## Getting Started
-
-First, run the development server:
+The content editor for etiedu.org. Talks to the FastAPI CMS in
+`../eti_website_cms_backend`; the public site it edits is `../eti_website`.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev     # http://localhost:3100
+npm run build && npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`.env.local`:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+NEXT_PUBLIC_CMS_API_URL=http://127.0.0.1:8001
+NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Default login after seeding: **admin / eti-admin**.
 
-## Learn More
+> That is a development default and is public knowledge. Change it before
+> the CMS is reachable by anyone else — the seeder takes
+> `--admin-password` for exactly this reason.
 
-To learn more about Next.js, take a look at the following resources:
+## What an editor can do
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Pages** — the whole site in the sidebar, nested by route so pages that
+  share a title (there are five "FAQ" pages) are told apart by their parent.
+- **Page editor** — every editable field on that page, grouped under the heading
+  it sits beneath, with a search box for finding a field by its text.
+  - *Text* — a single line or a paragraph
+  - *Formatted text* — edited **visually**, never as markup: type over the words
+    and use the Bold / Italic / Link buttons. An HTML toggle is there for anyone
+    who wants it.
+  - *Image* / *Video* — preview, the current filename, a **Change** button that
+    browses the media library or uploads, and a plain-language description field
+    for screen readers
+  - **Reset** on any field restores what the site originally shipped with
+- **Save is live** — there is no draft stage. Edits are held in the browser
+  until **Save changes**, which writes them and refreshes that page on the
+  website; the count of unsaved fields sits in the toolbar and each changed
+  field is marked. Leaving with unsaved edits warns first.
+- **Media library** — upload, browse and delete images, video and PDFs. Files
+  are stored in Postgres and served by the API.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## How it fits together
 
-## Deploy on Vercel
+```
+eti_website_cms_frontend  ──HTTP──>  eti_website_cms_backend  <──HTTP──  eti_website
+      (this app, :3100)                  (FastAPI, :8001)               (Next site, :3000)
+                                              │
+                                          save ↓ POST /api/revalidate
+                                          eti_website drops that route from cache
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Pages and slots are created by the website's generator, not here — the CMS edits
+the content of a fixed layout, it does not create pages. See
+`../eti_website/README.md` for how slots are extracted and
+`../eti_website_cms_backend/README.md` for the API.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Notes
+
+- The token is a JWT in `localStorage`. That is appropriate for an internal
+  admin tool on a trusted network; move it to an httpOnly cookie before exposing
+  this to the open internet.
+- The API's `CORS_ORIGINS` must list the exact origin this app is served from —
+  `localhost` and `127.0.0.1` are different origins to a browser.
+- **Formatted-text fields edit in place.** The values came out of the site's
+  page builder and carry markup an editor should never have to retype — links
+  with titles, UIkit button classes, `<br>` inside an address. Typing happens
+  inside a `contenteditable` surface, so replacing the words leaves the
+  surrounding tags and their classes untouched; a normal WYSIWYG that
+  re-serialises the document would strip them. Paste is forced to plain text for
+  the same reason.

@@ -1,0 +1,28 @@
+# ETI CMS admin.
+#
+#   docker compose up --build
+#
+# Joins the network created by ../eti_website_cms_backend, so bring that stack
+# up first.
+#
+# The browser talks to the API directly, so NEXT_PUBLIC_CMS_API_URL must be an
+# address reachable from the browser (localhost), not the in-network name.
+
+name: eti-cms-admin
+
+services:
+  cms:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_CMS_API_URL: ${NEXT_PUBLIC_CMS_API_URL:-http://localhost:8001}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    image: eti-cms-admin:latest
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+
+networks:
+  default:
+    name: eti-network
+    external: true
