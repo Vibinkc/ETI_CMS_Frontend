@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { useAuth } from "@/components/AuthProvider";
-import { Trash } from "@/components/icons";
+import { Crown, Trash } from "@/components/icons";
 import PermissionMatrix from "@/components/PermissionMatrix";
 import { api, type PermissionMatrixData, type Role } from "@/lib/api";
 
@@ -188,6 +188,11 @@ export default function Roles() {
     <>
       <div className="topbar">
         <h1>Roles</h1>
+        {roles && (
+          <span className="route">
+            {roles.length} {roles.length === 1 ? "role" : "roles"}
+          </span>
+        )}
         <div className="spacer" />
         {mayManage && (
           <button type="button" className="btn btn-primary btn-sm" onClick={() => setCreating(true)}>
@@ -200,36 +205,59 @@ export default function Roles() {
         {notice && <div className="notice notice-ok">{notice}</div>}
 
         {!roles ? <div className="empty">Loading…</div> : (
-          <div className="role-list">
-            {roles.map((role) => (
-              <section key={role.id} className="role-card">
-                <header>
-                  <h2>{role.name}</h2>
-                  {role.is_owner && <span className="badge badge-new">every permission</span>}
-                  {role.is_system && !role.is_owner && <span className="badge badge-live">built in</span>}
-                  <div className="spacer" />
-                  <span className="muted small">{role.user_count} account(s)</span>
-                </header>
-                <p className="muted">{role.description}</p>
-                <p className="small">
-                  {role.is_owner
-                    ? "Everything, including capabilities added later."
-                    : role.permissions.length
-                      ? `${role.permissions.length} permission(s)`
-                      : "No permissions — this role can sign in but do nothing."}
-                </p>
-                {mayManage && (
-                  <div className="role-actions">
-                    <button type="button" className="btn btn-sm" onClick={() => setEditing(role)}>Edit</button>
-                    {!role.is_system && (
-                      <button type="button" className="btn btn-sm" onClick={() => remove(role)} disabled={busy}>
-                        <Trash size={14} /> Delete
-                      </button>
-                    )}
-                  </div>
-                )}
-              </section>
-            ))}
+          <div className="sub-table-wrap">
+            <table className="sub-table">
+              <thead>
+                <tr>
+                  <th>Role</th><th>Description</th>
+                  <th>Permissions</th><th>Accounts</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {roles.map((role) => (
+                  <tr
+                    key={role.id}
+                    onClick={mayManage ? () => setEditing(role) : undefined}
+                    tabIndex={mayManage ? 0 : undefined}
+                    onKeyDown={(e) => { if (mayManage && e.key === "Enter") setEditing(role); }}
+                  >
+                    <td>
+                      <strong>{role.name}</strong>
+                      {role.is_owner && (
+                        <Crown size={14} className="owner-crown" aria-label="Every permission" />
+                      )}
+                      {role.is_system && !role.is_owner && (
+                        <span className="badge badge-live"> built in</span>
+                      )}
+                    </td>
+                    <td className="muted">{role.description}</td>
+                    <td className="small">
+                      {role.is_owner
+                        ? "Everything, including capabilities added later."
+                        : role.permissions.length
+                          ? `${role.permissions.length} permission(s)`
+                          : <span className="muted">None — can sign in but do nothing</span>}
+                    </td>
+                    <td className="muted small">{role.user_count}</td>
+                    <td>
+                      {/* the row opens the editor, so this must not reach it */}
+                      {mayManage && !role.is_system && (
+                        <button
+                          type="button"
+                          className="btn btn-sm"
+                          title={`Delete ${role.name}`}
+                          aria-label={`Delete ${role.name}`}
+                          onClick={(e) => { e.stopPropagation(); remove(role); }}
+                          disabled={busy}
+                        >
+                          <Trash size={14} />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

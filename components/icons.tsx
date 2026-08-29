@@ -356,6 +356,15 @@ export function Trash({ size = 16, className }: IconProps) {
   );
 }
 
+export function Crown({ size = 16, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7z" />
+      <path d="M5 20h14" />
+    </svg>
+  );
+}
+
 export function ArrowLeft({ size = 16, className }: IconProps) {
   return (
     <svg {...base(size)} className={className}>

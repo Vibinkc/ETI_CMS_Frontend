@@ -5,6 +5,12 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import Pagination from "@/components/Pagination";
 import { api, type ActivityPage, type ActivityRow } from "@/lib/api";
+import {
+  RANGE_LABELS,
+  rangeBounds,
+  todayValue,
+  type RangeKey,
+} from "@/lib/dateRange";
 
 /** Reads better than the raw action key, and groups related events. */
 const ACTIONS: Record<string, { label: string; tone: string }> = {
@@ -35,23 +41,6 @@ function when(iso: string) {
   });
 }
 
-type RangeKey = "all" | "today" | "week";
-
-function since(range: RangeKey): string | undefined {
-  const now = new Date();
-  if (range === "today") {
-    const d = new Date(now); d.setHours(0, 0, 0, 0);
-    return d.toISOString();
-  }
-  if (range === "week") {
-    const d = new Date(now);
-    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-    d.setHours(0, 0, 0, 0);
-    return d.toISOString();
-  }
-  return undefined;
-}
-
 const PAGE_SIZE = 25;
 
 export default function Activity() {
@@ -65,8 +54,11 @@ export default function Activity() {
   const [what, setWhat] = useState("");
   const [q, setQ] = useState("");
   const [range, setRange] = useState<RangeKey>("all");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [open, setOpen] = useState<ActivityRow | null>(null);
   const [page, setPage] = useState(1);
+  const today = todayValue();
 
   const load = useCallback(async () => {
     const params = new URLSearchParams({
@@ -76,15 +68,16 @@ export default function Activity() {
     if (who) params.set("username", who);
     if (what) params.set("action", what);
     if (q.trim()) params.set("q", q.trim());
-    const from = since(range);
-    if (from) params.set("since", from);
+    const { since, until } = rangeBounds(range, from, to);
+    if (since) params.set("since", since.toISOString());
+    if (until) params.set("until", until.toISOString());
     try {
       setData(await api.get<ActivityPage>(`/api/cms/activity?${params}`));
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not load the activity log");
     }
-  }, [who, what, q, range, page]);
+  }, [who, what, q, range, from, to, page]);
 
   useEffect(() => {
     const t = setTimeout(load, 250);
@@ -94,7 +87,7 @@ export default function Activity() {
   // A narrower filter can leave you on a page that no longer exists.
   useEffect(() => {
     setPage(1);
-  }, [who, what, q, range]);
+  }, [who, what, q, range, from, to]);
 
   useEffect(() => {
     api.get<{ usernames: string[]; actions: string[] }>("/api/cms/activity/filters")
@@ -125,16 +118,16 @@ export default function Activity() {
           <input className="sub-search" type="search" placeholder="Search what happened"
             value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search the activity log" />
           <label className="sub-check">
-            <span>Who</span>
+            <span>User</span>
             <select value={who} onChange={(e) => setWho(e.target.value)}>
-              <option value="">Everyone</option>
+              <option value="">All users</option>
               {filters.usernames.map((u) => <option key={u} value={u}>{u}</option>)}
             </select>
           </label>
           <label className="sub-check">
-            <span>What</span>
+            <span>Action</span>
             <select value={what} onChange={(e) => setWhat(e.target.value)}>
-              <option value="">Everything</option>
+              <option value="">All actions</option>
               {filters.actions.map((a) => (
                 <option key={a} value={a}>{describe(a).label}</option>
               ))}
@@ -142,15 +135,47 @@ export default function Activity() {
           </label>
         </div>
 
+        {/* Radios, not buttons: these are one choice out of five, and a screen
+            reader should hear them that way. */}
         <fieldset className="sub-range">
-          <legend className="sub-range-legend">Period</legend>
-          {([["all", "All time"], ["today", "Today"], ["week", "This week"]] as const).map(([key, label]) => (
+          <legend className="sub-range-legend">Filter by date</legend>
+          {RANGE_LABELS.map(({ key, label }) => (
             <label key={key} className={`sub-chip${range === key ? " on" : ""}`}>
-              <input type="radio" name="range" checked={range === key}
-                onChange={() => setRange(key)} />
+              <input
+                type="radio"
+                name="range"
+                value={key}
+                checked={range === key}
+                onChange={() => setRange(key)}
+              />
               {label}
             </label>
           ))}
+
+          {range === "custom" && (
+            <span className="sub-dates">
+              <label>
+                From
+                {/* never past today: nothing can have happened in the future */}
+                <input
+                  type="date"
+                  value={from}
+                  max={to || today}
+                  onChange={(e) => setFrom(e.target.value)}
+                />
+              </label>
+              <label>
+                <span>To</span>
+                <input
+                  type="date"
+                  value={to}
+                  min={from || undefined}
+                  max={today}
+                  onChange={(e) => setTo(e.target.value)}
+                />
+              </label>
+            </span>
+          )}
         </fieldset>
 
         {error && <div className="notice notice-error">{error}</div>}
@@ -161,7 +186,7 @@ export default function Activity() {
             <div className="sub-table-wrap">
               <table className="sub-table activity-table">
                 <thead>
-                  <tr><th>When</th><th>Who</th><th>Action</th><th>Detail</th></tr>
+                  <tr><th>When</th><th>User</th><th>Action</th><th>Detail</th></tr>
                 </thead>
                 <tbody>
                   {data.items.map((row) => {

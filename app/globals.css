@@ -40,8 +40,9 @@
 
   --radius: 10px;
   --shadow: var(--eti-shadow);
-  /* Wide enough for the longest item, "Apprentice of the Month", and no wider. */
-  --sidebar-w: 260px;
+  /* 292px left too much empty navy beside the labels; below ~260px the longest
+     item, "Apprentice of the Month", starts to truncate. */
+  --sidebar-w: 272px;
 }
 
 * {
@@ -241,6 +242,13 @@ a {
   white-space: nowrap;
 }
 
+/* Administration, Enquiries and Library have no page tree under them, so their
+   rows carry no twisty. Indent them by its width -- 16px plus the row's 1px
+   gap -- so every icon in the nav sits on the same line as the pages above. */
+.nav-group > .nav-item {
+  margin-left: 17px;
+}
+
 .nav-section {
   margin-bottom: 2px;
 }
@@ -405,6 +413,15 @@ a {
   font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
   font-size: 13px;
   color: var(--muted);
+}
+
+/* The count and the route read as part of the heading, so they sit on its
+   baseline. Centring them against a 19px heading leaves the smaller text
+   floating about 5px high. Only these two opt in -- the buttons alongside stay
+   centred in the bar. */
+.topbar h1,
+.topbar .route {
+  align-self: baseline;
 }
 
 .spacer {
@@ -1404,6 +1421,13 @@ label.field > span {
   vertical-align: middle;
 }
 
+/* the owner is marked with a crown beside the username, in the brand green */
+.owner-crown {
+  margin-left: 6px;
+  vertical-align: -2px;
+  color: var(--color-secondary-dark);
+}
+
 .sub-table tbody tr {
   cursor: pointer;
 }
@@ -1743,42 +1767,6 @@ label.field > span {
 
 .perm-row.from-role em {
   color: var(--eti-green, #5a9c2f);
-}
-
-.role-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
-  gap: 14px;
-}
-
-.role-card {
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--panel);
-  padding: 15px 17px;
-}
-
-.role-card header {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 6px;
-}
-
-.role-card h2 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 650;
-}
-
-.role-card p {
-  margin: 0 0 6px;
-}
-
-.role-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
 }
 
 /* -------------------------------------------------------- activity log --- */

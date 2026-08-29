@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { useAuth } from "@/components/AuthProvider";
-import { Trash, UserPlus } from "@/components/icons";
+import { Crown, Trash, UserPlus } from "@/components/icons";
 import PermissionMatrix from "@/components/PermissionMatrix";
 import { api, type Account, type PermissionMatrixData, type Role } from "@/lib/api";
 
@@ -334,7 +334,11 @@ export default function Users() {
     <>
       <div className="topbar">
         <h1>Users</h1>
-        {accounts && <span className="route">{accounts.length} account(s)</span>}
+        {accounts && (
+          <span className="route">
+            {accounts.length} {accounts.length === 1 ? "account" : "accounts"}
+          </span>
+        )}
         <div className="spacer" />
         {mayManage && (
           <button type="button" className="btn btn-primary btn-sm" onClick={() => setCreating(true)}>
@@ -355,35 +359,49 @@ export default function Users() {
               <thead>
                 <tr>
                   <th>Username</th><th>Name</th><th>Email</th>
-                  <th>Role</th><th>Last signed in</th><th>Status</th><th />
+                  <th>Role</th><th>Last signed in</th><th>Status</th><th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {accounts.map((a) => (
-                  <tr key={a.id}>
-                    <td><strong>{a.username}</strong>{a.is_superuser && <span className="badge badge-new"> owner</span>}</td>
+                {accounts.map((a) => {
+                  const edit = () => { setEditing(a); setNewPassword(""); };
+                  return (
+                  <tr
+                    key={a.id}
+                    onClick={mayManage ? edit : undefined}
+                    tabIndex={mayManage ? 0 : undefined}
+                    onKeyDown={(e) => { if (mayManage && e.key === "Enter") edit(); }}
+                  >
+                    <td>
+                      <strong>{a.username}</strong>
+                      {a.is_superuser && (
+                        <Crown size={14} className="owner-crown" aria-label="Owner" />
+                      )}
+                    </td>
                     <td>{[a.first_name, a.last_name].filter(Boolean).join(" ") || <span className="muted">—</span>}</td>
                     <td>{a.email}</td>
                     <td>{a.role_name ?? <span className="muted">none</span>}</td>
                     <td className="muted small">{when(a.last_login_at)}</td>
                     <td>{a.is_active ? "Active" : <span className="muted">Disabled</span>}</td>
                     <td>
-                      {mayManage && (
-                        <>
-                          <button type="button" className="btn btn-sm"
-                            onClick={() => { setEditing(a); setNewPassword(""); }}>
-                            Edit
-                          </button>{" "}
-                          {a.id !== me?.id && (
-                            <button type="button" className="btn btn-sm" onClick={() => remove(a)} disabled={busy}>
-                              <Trash size={14} />
-                            </button>
-                          )}
-                        </>
+                      {mayManage && a.id !== me?.id && (
+                        // the row itself opens the editor, so the delete button
+                        // has to stop the click reaching it
+                        <button
+                          type="button"
+                          className="btn btn-sm"
+                          title={`Delete ${a.username}`}
+                          aria-label={`Delete ${a.username}`}
+                          onClick={(e) => { e.stopPropagation(); remove(a); }}
+                          disabled={busy}
+                        >
+                          <Trash size={14} />
+                        </button>
                       )}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
