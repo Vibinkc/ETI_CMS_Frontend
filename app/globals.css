@@ -40,7 +40,8 @@
 
   --radius: 10px;
   --shadow: var(--eti-shadow);
-  --sidebar-w: 292px;
+  /* Wide enough for the longest item, "Apprentice of the Month", and no wider. */
+  --sidebar-w: 260px;
 }
 
 * {
