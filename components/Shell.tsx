@@ -48,20 +48,6 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </Link>
 
         <nav>
-          {can("submissions:view") && (
-          <div className="nav-group">
-            <div className="nav-heading">Enquiries</div>
-            <Link
-              href="/submissions"
-              className={`nav-item${onSubmissions ? " active" : ""}`}
-            >
-              <span className="nav-rail" aria-hidden="true" />
-              <Inbox size={18} className="nav-icon" />
-              <span className="nav-label">Contact forms</span>
-            </Link>
-          </div>
-          )}
-
           <PagesNav />
 
           {showAdmin && (
@@ -89,6 +75,20 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                 </Link>
               )}
             </div>
+          )}
+
+          {can("submissions:view") && (
+          <div className="nav-group">
+            <div className="nav-heading">Enquiries</div>
+            <Link
+              href="/submissions"
+              className={`nav-item${onSubmissions ? " active" : ""}`}
+            >
+              <span className="nav-rail" aria-hidden="true" />
+              <Inbox size={18} className="nav-icon" />
+              <span className="nav-label">Contact forms</span>
+            </Link>
+          </div>
           )}
 
           <div className="nav-group">
