@@ -19,6 +19,52 @@ export function getSitePages(): Promise<Page[]> {
   return pending;
 }
 
+const CACHE_KEY = "eti-cms.pages";
+
+/**
+ * The last page list we saw, kept so a refresh can draw the sidebar straight
+ * away instead of waiting on the network.
+ *
+ * Without it the sidebar paints with only the groups that need no data, then
+ * jumps as the page tree arrives -- measured at about half a second, and the
+ * whole nav shifting down under the cursor. The list is small and changes only
+ * when the site is regenerated, so showing the previous one and correcting it
+ * a moment later is honest.
+ *
+ * Cleared with the token, in setToken(null), so it does not outlive the
+ * session.
+ */
+export function readCachedPages(): Page[] | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as Page[]) : null;
+  } catch {
+    // private mode, cleared site data, or something that is not our JSON
+    return null;
+  }
+}
+
+export function writeCachedPages(pages: Page[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(CACHE_KEY, JSON.stringify(pages));
+  } catch {
+    /* storage full or blocked: the sidebar simply loads as it used to */
+  }
+}
+
+export function clearCachedPages(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(CACHE_KEY);
+  } catch {
+    /* nothing to do */
+  }
+}
+
 const SITE_SUFFIX = "Electrical Training Institute";
 const SEPARATORS = ["-", "–"];
 

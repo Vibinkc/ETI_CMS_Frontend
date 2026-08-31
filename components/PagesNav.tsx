@@ -23,7 +23,7 @@ import {
   Users,
 } from "@/components/icons";
 import { api, type Page } from "@/lib/api";
-import { withoutSiteName } from "@/lib/pages";
+import { readCachedPages, withoutSiteName, writeCachedPages } from "@/lib/pages";
 
 /**
  * How the page list is grouped, following the site's own navigation rather
@@ -164,13 +164,18 @@ export default function PagesNav() {
   const [pages, setPages] = useState<Page[] | null>(null);
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
-  // refetch on navigation so newly edited titles show up
+  // Draw last time's list first, then refetch on navigation so newly edited
+  // titles show up. The cache read is synchronous, so on a refresh the nav is
+  // complete on the first frame rather than half a second later.
   useEffect(() => {
     let cancelled = false;
+    setPages((current) => current ?? readCachedPages());
     (async () => {
       try {
         const data = await api.get<Page[]>("/api/cms/pages");
-        if (!cancelled) setPages(data);
+        if (cancelled) return;
+        setPages(data);
+        writeCachedPages(data);
       } catch {
         /* the page itself will surface the error */
       }

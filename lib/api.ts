@@ -15,8 +15,13 @@ export function getToken(): string | null {
 
 export function setToken(token: string | null) {
   if (typeof window === "undefined") return;
-  if (token) window.localStorage.setItem(TOKEN_KEY, token);
-  else window.localStorage.removeItem(TOKEN_KEY);
+  if (token) {
+    window.localStorage.setItem(TOKEN_KEY, token);
+  } else {
+    window.localStorage.removeItem(TOKEN_KEY);
+    // the cached sidebar belongs to the session that just ended
+    window.localStorage.removeItem("eti-cms.pages");
+  }
 }
 
 export class ApiError extends Error {
