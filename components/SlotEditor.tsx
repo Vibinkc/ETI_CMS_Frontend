@@ -100,6 +100,10 @@ export default function SlotEditor({
 }) {
   const [picking, setPicking] = useState(false);
   const [showPath, setShowPath] = useState(false);
+  // What a screen reader calls this field. Deliberately the slot's own label
+  // rather than headerLabel(), which follows the value being typed -- an
+  // accessible name that changes on every keystroke is worse than none.
+  const fieldName = slot.label || slot.key;
   const changed = value !== slot.live_value || altText !== (slot.alt_text ?? "");
   const isMedia = slot.kind === "image" || slot.kind === "video";
 
@@ -115,6 +119,7 @@ export default function SlotEditor({
           className="btn btn-sm"
           onClick={onReset}
           disabled={value === slot.default_value && altText === (slot.alt_text ?? "")}
+          aria-label={`Reset ${fieldName}`}
           title="Restore the text this page originally shipped with"
         >
           Reset
@@ -139,6 +144,7 @@ export default function SlotEditor({
               <button
                 type="button"
                 className="btn btn-sm btn-primary"
+                aria-label={`Change ${slot.kind} for ${fieldName}`}
                 onClick={() => setPicking(true)}
               >
                 <Upload size={15} />
@@ -169,6 +175,7 @@ export default function SlotEditor({
               <input
                 type="text"
                 className="mono"
+                aria-label={`File address for ${fieldName}`}
                 style={{ marginTop: 6 }}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
@@ -177,15 +184,21 @@ export default function SlotEditor({
           </div>
         </div>
       ) : slot.kind === "richtext" ? (
-        <RichTextEditor value={value} onChange={onChange} />
+        <RichTextEditor value={value} onChange={onChange} label={fieldName} />
       ) : value.length > 90 ? (
         <textarea
+          aria-label={fieldName}
           rows={Math.min(8, Math.max(2, Math.ceil(value.length / 90)))}
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
       ) : (
-        <input type="text" value={value} onChange={(e) => onChange(e.target.value)} />
+        <input
+          type="text"
+          aria-label={fieldName}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
       )}
 
       {picking ? (

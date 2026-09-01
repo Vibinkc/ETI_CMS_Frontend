@@ -207,6 +207,7 @@ export default function Roles() {
         {!roles ? <div className="empty">Loading…</div> : (
           <div className="sub-table-wrap">
             <table className="sub-table">
+              <caption>Roles and their permissions</caption>
               <thead>
                 <tr>
                   <th>Role</th><th>Description</th>
@@ -235,7 +236,7 @@ export default function Roles() {
                       {role.is_owner
                         ? "Everything, including capabilities added later."
                         : role.permissions.length
-                          ? `${role.permissions.length} permission(s)`
+                          ? `${role.permissions.length} ${role.permissions.length === 1 ? "permission" : "permissions"}`
                           : <span className="muted">None — can sign in but do nothing</span>}
                     </td>
                     <td className="muted small">{role.user_count}</td>

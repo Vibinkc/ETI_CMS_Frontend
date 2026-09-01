@@ -406,6 +406,7 @@ export default function Submissions() {
         ) : (
           <div className="sub-table-wrap">
             <table className="sub-table">
+              <caption>Contact form submissions</caption>
             <thead>
               <tr>
                 <th>Name</th>

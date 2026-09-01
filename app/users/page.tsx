@@ -356,6 +356,7 @@ export default function Users() {
         ) : (
           <div className="sub-table-wrap">
             <table className="sub-table">
+              <caption>CMS accounts</caption>
               <thead>
                 <tr>
                   <th>Username</th><th>Name</th><th>Email</th>

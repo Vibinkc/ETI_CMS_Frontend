@@ -185,6 +185,7 @@ export default function Activity() {
           : (
             <div className="sub-table-wrap">
               <table className="sub-table activity-table">
+                <caption>Activity log entries</caption>
                 <thead>
                   <tr><th>When</th><th>User</th><th>Action</th><th>Detail</th></tr>
                 </thead>

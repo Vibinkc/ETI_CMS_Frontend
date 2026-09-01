@@ -125,6 +125,7 @@ export default function MediaLibrary() {
                 type="button"
                 className="btn btn-sm"
                 style={{ marginTop: 6 }}
+                aria-label={`Delete ${m.filename}`}
                 onClick={() => remove(m)}
               >
                 Delete

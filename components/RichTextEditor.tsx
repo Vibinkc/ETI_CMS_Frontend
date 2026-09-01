@@ -81,9 +81,13 @@ function withHref(shell: Shell, href: string): Shell {
 export default function RichTextEditor({
   value,
   onChange,
+  label,
 }: {
   value: string;
   onChange: (next: string) => void;
+  /** What a screen reader calls this editor. Without it the surface is an
+   *  ARIA textbox with no accessible name, which axe reports as serious. */
+  label?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const lastHtml = useRef<string | null>(null);
@@ -421,6 +425,7 @@ export default function RichTextEditor({
             contentEditable
             suppressContentEditableWarning
             role="textbox"
+            aria-label={label}
             aria-multiline="true"
             onInput={emit}
             onBlur={emit}

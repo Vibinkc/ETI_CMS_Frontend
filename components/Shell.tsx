@@ -35,6 +35,11 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="shell">
+      {/* First thing in the tab order, visible only once focused: without it a
+          keyboard user walks the whole page tree before reaching the screen. */}
+      <a href="#main" className="skip-link">
+        Skip to content
+      </a>
       <aside className="sidebar">
         <Link href="/pages" className="sidebar-brand">
           {/* light variant — the full-colour mark is navy on a navy sidebar */}
@@ -127,7 +132,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           </button>
         </div>
       </aside>
-      <div className="main">{children}</div>
+      <main id="main" className="main">{children}</main>
     </div>
   );
 }
