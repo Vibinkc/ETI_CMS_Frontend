@@ -243,6 +243,20 @@ a {
   }
 }
 
+@media (max-width: 700px) {
+  /* The preview is a fixed 190px beside the controls. Once the slot is about
+     340px wide that leaves under 100px for the filename and its button, and
+     the row overflowed by 25px. Stack them instead of squeezing. */
+  .media-slot {
+    flex-direction: column;
+  }
+
+  .media-preview {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sidebar {
     transition: none;
@@ -1591,14 +1605,15 @@ label.field > span {
 /* Table names, for assistive tech only: each table already sits under a
    visible <h1>, so showing the caption too would just repeat it. */
 .sub-table caption {
+  /* Out of flow and clipped to nothing, but sized to its own text: the usual
+     width:1px recipe makes the element report scrollWidth > clientWidth, which
+     reads as an unexpected horizontal scroller even though nothing is visible. */
   position: absolute;
-  width: 1px;
   height: 1px;
   padding: 0;
   margin: -1px;
   overflow: hidden;
   clip-path: inset(50%);
-  white-space: nowrap;
   border: 0;
 }
 
