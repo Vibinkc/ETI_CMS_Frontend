@@ -1,10 +1,21 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import PagesNav from "@/components/PagesNav";
-import { ExternalLink, History, Images, Inbox, LogOut, Shield, Users } from "@/components/icons";
+import {
+  ExternalLink,
+  History,
+  Images,
+  Inbox,
+  LogOut,
+  Menu,
+  Shield,
+  Users,
+  X,
+} from "@/components/icons";
 import { SITE_BASE } from "@/lib/api";
 import { useAuth } from "@/components/AuthProvider";
 
@@ -12,6 +23,40 @@ import { useAuth } from "@/components/AuthProvider";
 export default function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, ready, logout, can, roleName } = useAuth();
+
+  /**
+   * Whether the sidebar is showing.
+   *
+   * `null` means nobody has said, and CSS decides: open on a desktop, off to
+   * the side below 1024px. Starting there rather than at a boolean keeps the
+   * server and the first client render identical, so a narrow screen never
+   * flashes the sidebar open before hiding it.
+   */
+  const [navOpen, setNavOpen] = useState<boolean | null>(null);
+  const wide = () =>
+    typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+
+  // From `null`, the first press has to mean the opposite of what CSS is
+  // currently showing -- closed on a desktop, open on a narrow screen.
+  const toggleNav = useCallback(() => {
+    setNavOpen((v) => (v === null ? !wide() : !v));
+  }, []);
+
+  // A narrow screen shows it over the content, so leaving it open across a
+  // navigation would hide the page just opened. On a desktop it sits beside
+  // the content and can stay as it was.
+  useEffect(() => {
+    if (!wide()) setNavOpen(null);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (navOpen !== true) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setNavOpen(wide() ? false : null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [navOpen]);
 
   if (pathname === "/login") return <>{children}</>;
 
@@ -33,14 +78,37 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   // again on every request, so this is tidiness rather than security.
   const showAdmin = can("users:view") || can("roles:manage") || can("activity:view");
 
+  const navState = navOpen === null ? "" : navOpen ? " nav-open" : " nav-closed";
+
   return (
-    <div className="shell">
+    <div className={`shell${navState}`}>
       {/* First thing in the tab order, visible only once focused: without it a
           keyboard user walks the whole page tree before reaching the screen. */}
       <a href="#main" className="skip-link">
         Skip to content
       </a>
-      <aside className="sidebar">
+
+      <button
+        type="button"
+        className="nav-opener"
+        onClick={toggleNav}
+        aria-label="Show the menu"
+        aria-expanded={navOpen === true}
+        aria-controls="cms-sidebar"
+      >
+        <Menu size={18} />
+      </button>
+
+      {/* Tapping beside the sidebar closes it, the way a drawer should. */}
+      <button
+        type="button"
+        className="nav-backdrop"
+        onClick={() => setNavOpen(wide() ? false : null)}
+        tabIndex={-1}
+        aria-hidden="true"
+      />
+
+      <aside className="sidebar" id="cms-sidebar">
         <Link href="/pages" className="sidebar-brand">
           {/* light variant — the full-colour mark is navy on a navy sidebar */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -51,6 +119,17 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             <span>Content manager</span>
           </span>
         </Link>
+
+        <button
+          type="button"
+          className="nav-closer"
+          onClick={toggleNav}
+          aria-label="Hide the menu"
+          aria-expanded={navOpen !== false}
+          aria-controls="cms-sidebar"
+        >
+          <X size={18} />
+        </button>
 
         <nav>
           <PagesNav />

@@ -105,6 +105,150 @@ a {
   height: 100vh;
 }
 
+/* ----------------------------------------------- sidebar as a drawer --- */
+/* The sidebar used to be 272px of the viewport at every width, with no
+   breakpoint anywhere: at 390px that left a 118px content column and every
+   route scrolled sideways. It can be put away now.
+
+   Three states. No class means nobody has chosen, and these rules decide --
+   beside the content on a desktop, off to the side below 1024px. .nav-open and
+   .nav-closed are a deliberate choice and win at any width. */
+
+.nav-opener,
+.nav-closer {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+/* Sits over the content, so it takes the light treatment. */
+.nav-opener {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 70;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm, var(--shadow));
+}
+
+.nav-opener:hover {
+  background: var(--bg);
+}
+
+/* Sits on the navy, so it takes the dark treatment. */
+.nav-closer {
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.nav-closer:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Keep the brand lockup clear of the close button rather than running under
+   it: the button is 40px at right:10px, so 56px of room clears it. */
+.shell.nav-open .sidebar-brand,
+.shell.nav-closed .sidebar-brand {
+  padding-right: 56px;
+}
+
+@media (max-width: 1023px) {
+  .sidebar-brand {
+    padding-right: 56px;
+  }
+}
+
+.nav-opener:focus-visible,
+.nav-closer:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+.nav-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  border: 0;
+  padding: 0;
+  background: rgba(6, 16, 38, 0.5);
+  cursor: pointer;
+}
+
+/* Put away by choice, at any width. */
+.shell.nav-closed .sidebar {
+  display: none;
+}
+
+.shell.nav-closed .nav-opener {
+  display: inline-flex;
+}
+
+/* The opener overlaps the sticky topbar, so the heading moves out of its way.
+   Scoped through .shell to outweigh the `padding` shorthand set later on. */
+.shell.nav-closed .topbar {
+  padding-left: 62px;
+}
+
+@media (max-width: 1023px) {
+  /* Out of the flow entirely, so the content column is the whole viewport
+     rather than what is left over after 272px. */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 60;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    box-shadow: 0 0 32px rgba(6, 16, 38, 0.35);
+  }
+
+  .nav-opener,
+  .nav-closer {
+    display: inline-flex;
+  }
+
+  .shell .topbar {
+    padding-left: 62px;
+  }
+
+  /* With the drawer over the content the opener is gone, so the heading can
+     have its normal indent back. */
+  .shell.nav-open .topbar {
+    padding-left: 26px;
+  }
+
+  .shell.nav-open .sidebar {
+    transform: none;
+  }
+
+  .shell.nav-open .nav-backdrop {
+    display: block;
+  }
+
+  .shell.nav-open .nav-opener {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
+  }
+}
+
 .sidebar-brand {
   display: flex;
   align-items: center;
