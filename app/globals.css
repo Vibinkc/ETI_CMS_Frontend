@@ -116,7 +116,6 @@ a {
 
 .nav-opener,
 .nav-closer {
-  display: none;
   align-items: center;
   justify-content: center;
   width: 40px;
@@ -127,8 +126,11 @@ a {
   cursor: pointer;
 }
 
-/* Sits over the content, so it takes the light treatment. */
+/* Sits over the content, so it takes the light treatment. Hidden until the
+   sidebar is actually away -- while the sidebar is up, its own close button is
+   the control. */
 .nav-opener {
+  display: none;
   position: fixed;
   top: 10px;
   left: 10px;
@@ -143,8 +145,10 @@ a {
   background: var(--bg);
 }
 
-/* Sits on the navy, so it takes the dark treatment. */
+/* Sits on the navy, so it takes the dark treatment. It lives inside the
+   sidebar, so it shows exactly when the sidebar does -- at every width. */
 .nav-closer {
+  display: inline-flex;
   position: absolute;
   top: 12px;
   right: 10px;
@@ -215,8 +219,7 @@ a {
     box-shadow: 0 0 32px rgba(6, 16, 38, 0.35);
   }
 
-  .nav-opener,
-  .nav-closer {
+  .nav-opener {
     display: inline-flex;
   }
 

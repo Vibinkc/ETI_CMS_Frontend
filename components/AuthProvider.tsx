@@ -110,6 +110,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (username: string, password: string) => {
       const res = await api.login(username, password);
       setToken(res.access_token);
+      // permsReady means "we know what this account may do". Booting without a
+      // token sets it true with an empty set, so setting the user below would
+      // otherwise let the redirect effect fire against that empty set and land
+      // a full administrator on /no-access -- with the sidebar then rendering
+      // correctly behind it, and nothing to send them back.
+      setPermsReady(false);
       setUser(res.user);
       const granted = await loadPermissions();
       router.replace(landingFor(granted));
