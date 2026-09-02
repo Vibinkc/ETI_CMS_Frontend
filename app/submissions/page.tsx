@@ -56,13 +56,22 @@ const GROUPS: { title: string; fields: string[] }[] = [
 /** Assembled into one block rather than five rows. */
 const ADDRESS_FIELDS = ["Address1", "address2", "City", "State", "Zip"];
 
-/** Form internals, not answers — shown quietly at the end. */
-const META_FIELDS = ["formid", "Date"];
+/**
+ * The website form's own identifier. It means nothing to whoever reads an
+ * enquiry -- "Formid: ec08ee2a-da04a06f" is noise on the page -- so it is
+ * swallowed rather than shown. It still has to be listed as handled, or
+ * dropping it from display would push it into "Other answers", which is worse.
+ */
+const HIDDEN_FIELDS = ["formid"];
+
+/** Form internals worth showing, quietly, at the end. */
+const META_FIELDS = ["Date"];
 
 const HANDLED = new Set([
   ...GROUPS.flatMap((g) => g.fields),
   ...ADDRESS_FIELDS,
   ...META_FIELDS,
+  ...HIDDEN_FIELDS,
   "Phone",
   "Email",
 ]);
@@ -296,11 +305,13 @@ export default function Submissions() {
             )}
           </div>
 
-          <p className="muted small sub-meta">
-            {META_FIELDS.filter((f) => a[f])
-              .map((f) => `${prettyLabel(f)}: ${a[f]}`)
-              .join("  ·  ")}
-          </p>
+          {META_FIELDS.some((f) => a[f]) && (
+            <p className="muted small sub-meta">
+              {META_FIELDS.filter((f) => a[f])
+                .map((f) => `${prettyLabel(f)}: ${a[f]}`)
+                .join("  ·  ")}
+            </p>
+          )}
         </div>
       </>
     );
