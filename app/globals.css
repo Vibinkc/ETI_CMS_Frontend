@@ -110,9 +110,9 @@ a {
    breakpoint anywhere: at 390px that left a 118px content column and every
    route scrolled sideways. It can be put away now.
 
-   Three states. No class means nobody has chosen, and these rules decide --
-   beside the content on a desktop, off to the side below 1024px. .nav-open and
-   .nav-closed are a deliberate choice and win at any width. */
+   Above 1024px the sidebar is simply part of the layout and there is nothing
+   to toggle -- neither button is shown. Below it, the sidebar leaves the flow
+   and .nav-open brings it in over the content. */
 
 .nav-opener,
 .nav-closer {
@@ -126,9 +126,7 @@ a {
   cursor: pointer;
 }
 
-/* Sits over the content, so it takes the light treatment. Hidden until the
-   sidebar is actually away -- while the sidebar is up, its own close button is
-   the control. */
+/* Sits over the content, so it takes the light treatment. */
 .nav-opener {
   display: none;
   position: fixed;
@@ -145,10 +143,9 @@ a {
   background: var(--bg);
 }
 
-/* Sits on the navy, so it takes the dark treatment. It lives inside the
-   sidebar, so it shows exactly when the sidebar does -- at every width. */
+/* Sits on the navy, so it takes the dark treatment. */
 .nav-closer {
-  display: inline-flex;
+  display: none;
   position: absolute;
   top: 12px;
   right: 10px;
@@ -161,12 +158,8 @@ a {
 }
 
 /* Keep the brand lockup clear of the close button rather than running under
-   it: the button is 40px at right:10px, so 56px of room clears it. */
-.shell.nav-open .sidebar-brand,
-.shell.nav-closed .sidebar-brand {
-  padding-right: 56px;
-}
-
+   it: the button is 40px at right:10px, so 56px of room clears it. Only below
+   1024px, where that button exists. */
 @media (max-width: 1023px) {
   .sidebar-brand {
     padding-right: 56px;
@@ -190,21 +183,6 @@ a {
   cursor: pointer;
 }
 
-/* Put away by choice, at any width. */
-.shell.nav-closed .sidebar {
-  display: none;
-}
-
-.shell.nav-closed .nav-opener {
-  display: inline-flex;
-}
-
-/* The opener overlaps the sticky topbar, so the heading moves out of its way.
-   Scoped through .shell to outweigh the `padding` shorthand set later on. */
-.shell.nav-closed .topbar {
-  padding-left: 62px;
-}
-
 @media (max-width: 1023px) {
   /* Out of the flow entirely, so the content column is the whole viewport
      rather than what is left over after 272px. */
@@ -219,7 +197,8 @@ a {
     box-shadow: 0 0 32px rgba(6, 16, 38, 0.35);
   }
 
-  .nav-opener {
+  .nav-opener,
+  .nav-closer {
     display: inline-flex;
   }
 

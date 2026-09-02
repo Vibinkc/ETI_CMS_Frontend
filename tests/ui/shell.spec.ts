@@ -43,14 +43,20 @@ test.describe("Shell, sidebar and the drawer", () => {
     await expect(page.locator("a.skip-link")).toHaveAttribute("href", "#main");
   });
 
-  test("NV-8 the burger closes the sidebar on a desktop", async ({ page }) => {
-    const width = async () =>
-      page.locator("main.main").evaluate((el) => Math.round(el.getBoundingClientRect().width));
-    const before = await width();
-    await page.locator(".nav-closer").click();
-    await expect(page.locator("aside.sidebar")).toBeHidden();
-    expect(await width(), "content should take the freed space").toBeGreaterThan(before);
-    await page.locator(".nav-opener").click();
+  test("NV-8 a desktop has no burger at all", async ({ page }) => {
+    // Above 1024px the sidebar is part of the layout, so there is nothing to
+    // toggle and neither control is offered.
+    await expect(page.locator("aside.sidebar")).toBeVisible();
+    await expect(page.locator(".nav-opener")).toBeHidden();
+    await expect(page.locator(".nav-closer")).toBeHidden();
+  });
+
+  test("NV-8 the burger appears only once the viewport narrows", async ({ page }) => {
+    await expect(page.locator(".nav-opener")).toBeHidden();
+    await page.setViewportSize({ width: 1023, height: 800 });
+    await expect(page.locator(".nav-opener")).toBeVisible();
+    await page.setViewportSize({ width: 1024, height: 800 });
+    await expect(page.locator(".nav-opener")).toBeHidden();
     await expect(page.locator("aside.sidebar")).toBeVisible();
   });
 

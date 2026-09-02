@@ -25,34 +25,27 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const { user, ready, logout, can, roleName } = useAuth();
 
   /**
-   * Whether the sidebar is showing.
+   * Whether the drawer is open. Only meaningful below 1024px -- above that the
+   * sidebar is simply part of the layout and there is nothing to toggle, so the
+   * buttons are not rendered to the user at all.
    *
-   * `null` means nobody has said, and CSS decides: open on a desktop, off to
-   * the side below 1024px. Starting there rather than at a boolean keeps the
-   * server and the first client render identical, so a narrow screen never
-   * flashes the sidebar open before hiding it.
+   * Defaults to false, which renders no class, so the server and the first
+   * client render agree and a narrow screen never flashes the drawer open.
    */
-  const [navOpen, setNavOpen] = useState<boolean | null>(null);
-  const wide = () =>
-    typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+  const [navOpen, setNavOpen] = useState(false);
 
-  // From `null`, the first press has to mean the opposite of what CSS is
-  // currently showing -- closed on a desktop, open on a narrow screen.
-  const toggleNav = useCallback(() => {
-    setNavOpen((v) => (v === null ? !wide() : !v));
-  }, []);
+  const toggleNav = useCallback(() => setNavOpen((v) => !v), []);
 
-  // A narrow screen shows it over the content, so leaving it open across a
-  // navigation would hide the page just opened. On a desktop it sits beside
-  // the content and can stay as it was.
+  // The drawer covers the content, so leaving it open across a navigation
+  // would hide the page just opened.
   useEffect(() => {
-    if (!wide()) setNavOpen(null);
+    setNavOpen(false);
   }, [pathname]);
 
   useEffect(() => {
-    if (navOpen !== true) return;
+    if (!navOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setNavOpen(wide() ? false : null);
+      if (e.key === "Escape") setNavOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -78,10 +71,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   // again on every request, so this is tidiness rather than security.
   const showAdmin = can("users:view") || can("roles:manage") || can("activity:view");
 
-  const navState = navOpen === null ? "" : navOpen ? " nav-open" : " nav-closed";
-
   return (
-    <div className={`shell${navState}`}>
+    <div className={`shell${navOpen ? " nav-open" : ""}`}>
       {/* First thing in the tab order, visible only once focused: without it a
           keyboard user walks the whole page tree before reaching the screen. */}
       <a href="#main" className="skip-link">
@@ -93,7 +84,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         className="nav-opener"
         onClick={toggleNav}
         aria-label="Show the menu"
-        aria-expanded={navOpen === true}
+        aria-expanded={navOpen}
         aria-controls="cms-sidebar"
       >
         <Menu size={18} />
@@ -103,7 +94,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       <button
         type="button"
         className="nav-backdrop"
-        onClick={() => setNavOpen(wide() ? false : null)}
+        onClick={() => setNavOpen(false)}
         tabIndex={-1}
         aria-hidden="true"
       />
@@ -125,7 +116,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           className="nav-closer"
           onClick={toggleNav}
           aria-label="Hide the menu"
-          aria-expanded={navOpen !== false}
+          aria-expanded={navOpen}
           aria-controls="cms-sidebar"
         >
           <X size={18} />
