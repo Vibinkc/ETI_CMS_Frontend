@@ -16,7 +16,10 @@ import { useEffect } from "react";
 
 import { AlertCircle } from "@/components/icons";
 
-export default function Error({
+// Named rather than called Error: Next only cares that this file default-exports
+// a component, and shadowing the global Error inside a file whose parameter is
+// typed `Error` is asking to be misread.
+export default function ErrorScreen({
   error,
   reset,
 }: {
